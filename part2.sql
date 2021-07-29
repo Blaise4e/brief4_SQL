@@ -116,4 +116,67 @@ FROM concert
 JOIN orchestre ON orchestre.nom = concert.nomOrchestre
 WHERE style LIKE "blues" AND date_ LIKE "2015%"
 
+-- 04 Donner le prix moyen des concerts de style jazz par lieu de production.
+SELECT AVG(concert.prix), concert.lieu
+FROM concert
+JOIN orchestre ON orchestre.nom = concert.nomOrchestre
+WHERE orchestre.style LIKE "jazz"
+ORDER BY concert.lieu
 
+-- 05 Donner la liste des instruments participant aux concerts donnés par le chef Smith le 1er janvier 2016.
+SELECT instrument
+FROM musicien
+JOIN orchestre ON orchestre.nom = musicien.nomOrchestre
+JOIN concert ON concert.nomOrchestre = orchestre.nom
+WHERE orchestre.chef LIKE "Smith" AND concert.date_ LIKE "2016-01-01"
+
+-- 21 Donner le nombre moyen d'années d'expérience des joueurs de trompette par style d'orchestre
+SELECT AVG(musicien.anneeExperience),  orchestre.style
+FROM musicien
+JOIN orchestre ON orchestre.nom = musicien.nomOrchestre
+WHERE musicien.instrument LIKE "trompette" ORDER BY orchestre.style
+
+-- Multi-tables, avec jointures
+-- 01 Donner la liste des noms et instruments des musiciens ayant plus de 3 ans d'expérience
+-- et faisant partie d'un orchestre de style jazz. On affichera par ordre alphabétique sur les noms.
+
+SELECT nom, instrument 
+FROM musicien
+WHERE anneeExperience >3
+AND nomOrchestre 
+IN
+(SELECT nom
+FROM orchestre WHERE style LIKE "jazz");
+
+-- 02 Donner les différents lieux, triés par ordre alphabétique, de concerts 
+-- où l'orchestre du chef Smith joue avec un prix inférieur à 20.
+
+SELECT lieu 
+FROM concert 
+WHERE prix < 20
+AND nomOrchestre
+IN(SELECT nom FROM orchestre WHERE chef LIKE "Smith") 
+ORDER BY lieu ASC
+
+-- 03 Donner le nombre de concerts de blues en 2015.
+
+SELECT COUNT(nom)
+FROM concert
+WHERE nomOrchestre
+IN(SELECT nom FROM orchestre WHERE style LIKE "blues" AND date_ LIKE "2015")
+
+-- 04 Donner le prix moyen des concerts de style jazz par lieu de production
+
+SELECT AVG(prix), lieu 
+FROM concert
+WHERE nomOrchestre
+IN(SELECT nom FROM orchestre WHERE style LIKE "jazz" )
+ORDER BY lieu
+
+-- 05 Donner la liste des instruments participant aux concerts donnés par le chef Smith le 1er janvier 2016
+
+SELECT instrument
+FROM musicien
+WHERE nomOrchestre
+IN (SELECT nom FROM orchestre WHERE nom 
+IN (SELECT nomOrchestre FROM concert WHERE chef LIKE "Smith" AND date_ LIKE "2016-01-01"))
